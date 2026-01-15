@@ -1,0 +1,31 @@
+name: Run Domain Scanner
+
+on:
+  schedule:
+    - cron: "0 */12 * * *"  # roda a cada 12h
+  workflow_dispatch:
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run script
+        run: python fresh_domains.py
+
+      - name: Commit results
+        run: |
+          git config --global user.name "bot"
+          git config --global user.email "bot@github.com"
+          git add fresh_domains.csv
+          git commit -m "update domain list" || echo "no changes"
+          git push
